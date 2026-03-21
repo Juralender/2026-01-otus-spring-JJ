@@ -7,4 +7,7 @@ import lombok.Data;
 @Data
 public class AppProperties implements TestFileNameProvider {
     private String testFileName;
+
+    @Override
+    public String getTestFileName() { return testFileName; }
 }
