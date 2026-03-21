@@ -1,6 +1,7 @@
 package ru.otus.hw.dao;
 
 import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.CsvToBeanFilter;
 import lombok.RequiredArgsConstructor;
 import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.dao.dto.QuestionDto;
@@ -20,7 +21,7 @@ public class CsvQuestionDao implements QuestionDao {
     @Override
     public List<Question> findAll() {
         try {
-            final InputStream inputStream = getClass().getResourceAsStream(fileNameProvider.getTestFileName());
+            final InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileNameProvider.getTestFileName());
             if (inputStream != null) {
                 return processQuestionsCSVFile(inputStream);
             }
@@ -31,11 +32,15 @@ public class CsvQuestionDao implements QuestionDao {
     }
 
     private List<Question> processQuestionsCSVFile(InputStream inputStream) {
-        // Использовать CsvToBean
-        // https://opencsv.sourceforge.net/#collection_based_bean_fields_one_to_many_mappings
-        // Использовать QuestionReadException
-        // Про ресурсы: https://mkyong.com/java/java-read-a-file-from-resources-folder/
+        final CsvToBeanFilter commentFilter = new CsvToBeanFilter() {
+            @Override
+            public boolean allowLine(String[] line) {
+                return line == null || line.length <= 0 || line[0] == null || !line[0].trim().startsWith("#");
+            }
+        };
+
         return new CsvToBeanBuilder<QuestionDto>(new InputStreamReader(inputStream))
+                .withFilter(commentFilter)
                 .withIgnoreEmptyLine(true)
                 .withIgnoreLeadingWhiteSpace(true)
                 .withSeparator(';')

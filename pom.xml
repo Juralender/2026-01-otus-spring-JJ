@@ -18,7 +18,7 @@
         <junit.version>5.10.2</junit.version>
         <mockito.version>5.10.0</mockito.version>
         <assertj.version>3.27.7</assertj.version>
-        <lombok.version>1.18.32</lombok.version>
+        <lombok.version>1.18.36</lombok.version>
         <checkstyle-plugin.version>3.3.1</checkstyle-plugin.version>
         <checkstyle.version>10.15.0</checkstyle.version>
         <checkstyle.config.url>
