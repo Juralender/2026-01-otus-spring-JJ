@@ -20,7 +20,8 @@ public class CsvQuestionDao implements QuestionDao {
 
     @Override
     public List<Question> findAll() {
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileNameProvider.getTestFileName())) {
+        var loader = getClass().getClassLoader();
+        try (InputStream inputStream = loader.getResourceAsStream(fileNameProvider.getTestFileName())) {
             if (inputStream != null) {
                 return processQuestionsCSVFile(inputStream);
             }

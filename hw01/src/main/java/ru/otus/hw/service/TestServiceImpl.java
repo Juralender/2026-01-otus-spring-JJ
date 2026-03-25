@@ -29,9 +29,10 @@ public class TestServiceImpl implements TestService {
 
         ioService.printLine(text);
         var idx = 0;
-        for(var answer: answers) {
+        for (var answer: answers) {
             ioService.printFormattedLine("%d) %s", idx++, answer.text().trim());
         }
+
         ioService.printLine("");
     }
 }
