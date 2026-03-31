@@ -45,13 +45,12 @@ public class TestServiceImpl implements TestService {
         }
 
         strBuilder.append(text);
+        strBuilder.append("\n");
 
         var idx = 0;
         for (var answer: answers) {
-            strBuilder.append(String.format("%d) %s", idx++, answer.text().trim()));
+            strBuilder.append(String.format("%d) %s\n", idx++, answer.text().trim()));
         }
-
-        strBuilder.append("\n");
 
         return strBuilder.toString();
     }
