@@ -77,16 +77,67 @@ class TestServiceImplTest {
     }
 
     @Test
-    @DisplayName("должен иметь ноль правильных ответов так как валидация ответов не реализована")
-    void shouldHaveZeroRightAnswersSinceNotImplemented() {
-        var questions = List.of(
-                new Question("Q1?", List.of(new Answer("A1", true), new Answer("A2", false)))
-        );
-        when(questionDao.findAll()).thenReturn(questions);
-        when(ioService.readIntForRangeWithPrompt(anyInt(), anyInt(), anyString(), anyString())).thenReturn(0);
+    @DisplayName("должен засчитать правильный ответ когда выбран isCorrect=true")
+    void shouldCountCorrectAnswerWhenIsCorrectIsTrue() {
+        var question = new Question("Q1?", List.of(
+                new Answer("Wrong", false),
+                new Answer("Right", true)
+        ));
+        when(questionDao.findAll()).thenReturn(List.of(question));
+        when(ioService.readIntForRangeWithPrompt(anyInt(), anyInt(), anyString(), anyString()))
+                .thenReturn(1); // выбираем ответ с isCorrect=true
+
+        TestResult result = testService.executeTestFor(student);
+
+        assertThat(result.getRightAnswersCount()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("должен не засчитать ответ когда выбран isCorrect=false")
+    void shouldNotCountAnswerWhenIsCorrectIsFalse() {
+        var question = new Question("Q1?", List.of(
+                new Answer("Wrong", false),
+                new Answer("Right", true)
+        ));
+        when(questionDao.findAll()).thenReturn(List.of(question));
+        when(ioService.readIntForRangeWithPrompt(anyInt(), anyInt(), anyString(), anyString()))
+                .thenReturn(0); // выбираем ответ с isCorrect=false
 
         TestResult result = testService.executeTestFor(student);
 
         assertThat(result.getRightAnswersCount()).isZero();
+    }
+
+    @Test
+    @DisplayName("должен корректно считать правильные ответы среди нескольких вопросов")
+    void shouldCountCorrectAnswersAmongMultipleQuestions() {
+        var q1 = new Question("Q1?", List.of(new Answer("Right", true), new Answer("Wrong", false)));
+        var q2 = new Question("Q2?", List.of(new Answer("Wrong", false), new Answer("Right", true)));
+        var q3 = new Question("Q3?", List.of(new Answer("Wrong", false), new Answer("Also wrong", false)));
+        when(questionDao.findAll()).thenReturn(List.of(q1, q2, q3));
+        when(ioService.readIntForRangeWithPrompt(anyInt(), anyInt(), anyString(), anyString()))
+                .thenReturn(0)  // q1: выбираем index 0 → isCorrect=true
+                .thenReturn(1)  // q2: выбираем index 1 → isCorrect=true
+                .thenReturn(0); // q3: выбираем index 0 → isCorrect=false
+
+        TestResult result = testService.executeTestFor(student);
+
+        assertThat(result.getRightAnswersCount()).isEqualTo(2);
+        assertThat(result.getAnsweredQuestions()).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("должен вернуть ноль правильных ответов когда все ответы неверные")
+    void shouldReturnZeroWhenAllAnswersAreWrong() {
+        var q1 = new Question("Q1?", List.of(new Answer("Wrong", false), new Answer("Also wrong", false)));
+        var q2 = new Question("Q2?", List.of(new Answer("Nope", false), new Answer("Nah", false)));
+        when(questionDao.findAll()).thenReturn(List.of(q1, q2));
+        when(ioService.readIntForRangeWithPrompt(anyInt(), anyInt(), anyString(), anyString()))
+                .thenReturn(0);
+
+        TestResult result = testService.executeTestFor(student);
+
+        assertThat(result.getRightAnswersCount()).isZero();
+        assertThat(result.getAnsweredQuestions()).hasSize(2);
     }
 }

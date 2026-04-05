@@ -24,13 +24,13 @@ public class TestServiceImpl implements TestService {
 
         for (var question: questions) {
             var answersCount = question.answers().size() - 1;
-            ioService.readIntForRangeWithPrompt(
+            var answerIndex = ioService.readIntForRangeWithPrompt(
                     0,
                     answersCount,
                     TestServiceImpl.formatQuestion(question),
                     String.format("Accept only from 0 to %d", answersCount)
             );
-            var isAnswerValid = false; // Задать вопрос, получить ответ
+            var isAnswerValid = question.answers().get(answerIndex).isCorrect();
             testResult.applyAnswer(question, isAnswerValid);
         }
         return testResult;
