@@ -26,7 +26,7 @@
         <checkstyle.config.url>
             https://raw.githubusercontent.com/OtusTeam/Spring/master/checkstyle.xml
         </checkstyle.config.url>
-        <spring-shell.version>3.2.0-M1</spring-shell.version>
+        <spring-shell.version>3.4.0</spring-shell.version>
     </properties>
     <dependencyManagement>
         <dependencies>

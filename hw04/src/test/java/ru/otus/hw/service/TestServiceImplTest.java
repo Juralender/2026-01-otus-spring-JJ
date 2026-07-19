@@ -3,6 +3,9 @@ package ru.otus.hw.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.otus.hw.dao.QuestionDao;
 import ru.otus.hw.domain.Answer;
 import ru.otus.hw.domain.Question;
@@ -15,27 +18,27 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 
+@SpringBootTest
 @DisplayName("TestServiceImpl")
 class TestServiceImplTest {
 
+    @Autowired
+    private TestService testService;
+
+    @MockitoBean
     private LocalizedIOService ioService;
 
+    @MockitoBean
     private QuestionDao questionDao;
-
-    private TestServiceImpl testService;
 
     private Student student;
 
     @BeforeEach
     void setUp() {
-        ioService = mock(LocalizedIOService.class);
-        questionDao = mock(QuestionDao.class);
-        testService = new TestServiceImpl(ioService, questionDao);
         student = new Student("John", "Doe");
     }
 
