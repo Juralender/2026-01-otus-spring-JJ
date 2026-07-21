@@ -32,7 +32,8 @@ public class JdbcBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        String sql = "select book.id as id, book.title as title, book.author_id as author_id, author.full_name as full_name, "
+        String sql = "select book.id as id, book.title as title, "
+                + "book.author_id as author_id, author.full_name as full_name, "
                 + "genre.id as genre_id, genre.name as genre_name "
                 + "from books book "
                 + "join authors author on author.id = book.author_id "
@@ -68,7 +69,8 @@ public class JdbcBookRepository implements BookRepository {
     }
 
     private List<Book> getAllBooksWithoutGenres() {
-        String sql = "select book.id as id, book.title as title, book.author_id as author_id, author.full_name as full_name "
+        String sql = "select book.id as id, book.title as title, "
+                + "book.author_id as author_id, author.full_name as full_name "
                 + "from books book join authors author on author.id = book.author_id";
         return namedParameterJdbcOperations.query(sql, new BookRowMapper());
     }
