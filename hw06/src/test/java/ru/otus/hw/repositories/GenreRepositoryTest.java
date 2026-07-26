@@ -1,12 +1,10 @@
 package ru.otus.hw.repositories;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
 import ru.otus.hw.models.Genre;
 
@@ -17,36 +15,34 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("Репозиторий на основе Jdbc для работы с жанрами ")
-@JdbcTest
-@ImportAutoConfiguration(LiquibaseAutoConfiguration.class)
-@Import(JdbcGenreRepository.class)
-class JdbcGenreRepositoryTest {
+@DisplayName("Репозиторий на основе Jpa для работы с жанрами")
+@DataJpaTest
+@Import(JpaGenreRepository.class)
+class GenreRepositoryTest {
 
     @Autowired
-    private JdbcGenreRepository repositoryJdbc;
+    private JpaGenreRepository repository;
 
-    private List<Genre> dbGenres;
-
-    @BeforeEach
-    void setUp() {
-        dbGenres = getDbGenres();
-    }
+    @Autowired
+    private TestEntityManager testEntityManager;
 
     @DisplayName("должен загружать список всех жанров")
     @Test
     void shouldReturnCorrectGenresList() {
-        var actualGenres = repositoryJdbc.findAll();
-        assertThat(actualGenres).containsExactlyElementsOf(dbGenres);
+        var actualGenres = repository.findAll();
+        assertThat(actualGenres).containsExactlyElementsOf(getDbGenres());
     }
 
     @DisplayName("должен загружать жанры по набору id")
     @Test
     void shouldReturnCorrectGenresByIds() {
-        var expectedGenres = List.of(dbGenres.get(0), dbGenres.get(2), dbGenres.get(4));
+        var expectedGenres = List.of(
+                testEntityManager.find(Genre.class, 1L),
+                testEntityManager.find(Genre.class, 3L),
+                testEntityManager.find(Genre.class, 5L));
         var ids = expectedGenres.stream().map(Genre::getId).collect(Collectors.toSet());
 
-        var actualGenres = repositoryJdbc.findAllByIds(ids);
+        var actualGenres = repository.findAllByIds(ids);
 
         assertThat(actualGenres).containsExactlyInAnyOrderElementsOf(expectedGenres);
     }
@@ -54,7 +50,7 @@ class JdbcGenreRepositoryTest {
     @DisplayName("должен возвращать пустой список, если жанры с переданными id не найдены")
     @Test
     void shouldReturnEmptyListForUnknownIds() {
-        var actualGenres = repositoryJdbc.findAllByIds(Set.of(10_000L));
+        var actualGenres = repository.findAllByIds(Set.of(10_000L));
         assertThat(actualGenres).isEmpty();
     }
 

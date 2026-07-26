@@ -7,3 +7,6 @@ spring:
     hibernate:
       ddl-auto: none
     open-in-view: false
+  shell:
+    interactive:
+      enabled: false
