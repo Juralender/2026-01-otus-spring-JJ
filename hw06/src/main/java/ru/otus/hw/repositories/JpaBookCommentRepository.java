@@ -7,6 +7,7 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.BookComment;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -17,20 +18,18 @@ public class JpaBookCommentRepository implements BookCommentRepository {
 
     @Override
     public Optional<BookComment> findById(long id) {
-        return entityManager.createQuery(
-                        "select c from BookComment c join fetch c.book where c.id = :id", BookComment.class)
-                .setParameter("id", id)
-                .getResultList()
-                .stream()
-                .findFirst();
+        var comment = entityManager.find(BookComment.class, id,
+                Map.of("jakarta.persistence.fetchgraph", entityManager.getEntityGraph("BookComment.withBook")));
+        return Optional.ofNullable(comment);
     }
 
     @Override
     public List<BookComment> findAllByBookId(long bookId) {
         return entityManager.createQuery(
-                        "select c from BookComment c join fetch c.book where c.book.id = :bookId order by c.id",
+                        "select c from BookComment c where c.book.id = :bookId order by c.id",
                         BookComment.class)
                 .setParameter("bookId", bookId)
+                .setHint("jakarta.persistence.fetchgraph", entityManager.getEntityGraph("BookComment.withBook"))
                 .getResultList();
     }
 

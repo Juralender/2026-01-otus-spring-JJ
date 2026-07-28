@@ -7,6 +7,7 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -17,30 +18,19 @@ public class JpaBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        var books = entityManager.createQuery(
-                        "select b from Book b join fetch b.author where b.id = :id", Book.class)
-                .setParameter("id", id)
-                .getResultList();
-        if (books.isEmpty()) {
-            return Optional.empty();
-        }
-
-        entityManager.createQuery(
-                        "select b from Book b left join fetch b.genres where b.id = :id", Book.class)
-                .setParameter("id", id)
-                .getResultList();
-
-        return Optional.of(books.get(0));
+        var book = entityManager.find(Book.class, id,
+                Map.of("jakarta.persistence.fetchgraph", entityManager.getEntityGraph("Book.withAuthorAndGenres")));
+        return Optional.ofNullable(book);
     }
 
     @Override
     public List<Book> findAll() {
-        var books = entityManager.createQuery(
-                        "select b from Book b join fetch b.author order by b.id", Book.class)
+        var books = entityManager.createQuery("select b from Book b order by b.id", Book.class)
+                .setHint("jakarta.persistence.fetchgraph", entityManager.getEntityGraph("Book.withAuthor"))
                 .getResultList();
 
-        entityManager.createQuery(
-                        "select b from Book b left join fetch b.genres order by b.id", Book.class)
+        entityManager.createQuery("select b from Book b order by b.id", Book.class)
+                .setHint("jakarta.persistence.fetchgraph", entityManager.getEntityGraph("Book.withGenres"))
                 .getResultList();
 
         return books;

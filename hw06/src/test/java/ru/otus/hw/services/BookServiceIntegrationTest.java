@@ -3,8 +3,14 @@ package ru.otus.hw.services;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.models.Genre;
+import ru.otus.hw.repositories.JpaAuthorRepository;
+import ru.otus.hw.repositories.JpaBookRepository;
+import ru.otus.hw.repositories.JpaGenreRepository;
 
 import java.util.Set;
 
@@ -12,7 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DisplayName("Интеграционные тесты сервиса книг")
-@SpringBootTest
+@DataJpaTest
+@Import({BookServiceImpl.class, JpaBookRepository.class, JpaAuthorRepository.class, JpaGenreRepository.class})
+@Transactional(propagation = Propagation.NEVER)
 class BookServiceIntegrationTest {
 
     @Autowired
