@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.JpaAuthorRepository;
 import ru.otus.hw.repositories.JpaBookRepository;
@@ -32,7 +33,7 @@ class BookServiceIntegrationTest {
         var book = bookService.findById(1L).orElseThrow();
 
         assertThatCode(() -> {
-            assertThat(book.getAuthor().getFullName()).isEqualTo("Author_1");
+            assertThat(book.getAuthor()).usingRecursiveComparison().isEqualTo(new Author(1L, "Author_1"));
             assertThat(book.getGenres()).extracting(Genre::getName)
                     .containsExactly("Genre_1", "Genre_2");
         }).doesNotThrowAnyException();
@@ -56,7 +57,7 @@ class BookServiceIntegrationTest {
         var savedBook = bookService.insert("Integration_Test_Book", 1L, Set.of(1L, 2L));
         try {
             assertThatCode(() -> {
-                assertThat(savedBook.getAuthor().getFullName()).isEqualTo("Author_1");
+                assertThat(savedBook.getAuthor()).usingRecursiveComparison().isEqualTo(new Author(1L, "Author_1"));
                 assertThat(savedBook.getGenres()).extracting(Genre::getName)
                         .containsExactlyInAnyOrder("Genre_1", "Genre_2");
             }).doesNotThrowAnyException();
@@ -73,7 +74,7 @@ class BookServiceIntegrationTest {
             var updatedBook = bookService.update(savedBook.getId(), "Updated_Title", 2L, Set.of(3L, 4L));
 
             assertThatCode(() -> {
-                assertThat(updatedBook.getAuthor().getFullName()).isEqualTo("Author_2");
+                assertThat(updatedBook.getAuthor()).usingRecursiveComparison().isEqualTo(new Author(2L, "Author_2"));
                 assertThat(updatedBook.getGenres()).extracting(Genre::getName)
                         .containsExactlyInAnyOrder("Genre_3", "Genre_4");
             }).doesNotThrowAnyException();

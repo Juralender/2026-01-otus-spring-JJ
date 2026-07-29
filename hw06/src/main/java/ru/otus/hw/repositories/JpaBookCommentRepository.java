@@ -3,7 +3,6 @@ package ru.otus.hw.repositories;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.BookComment;
 
 import java.util.List;
@@ -40,9 +39,6 @@ public class JpaBookCommentRepository implements BookCommentRepository {
             return comment;
         }
 
-        if (entityManager.find(BookComment.class, comment.getId()) == null) {
-            throw new EntityNotFoundException("Comment with id %d not found".formatted(comment.getId()));
-        }
         return entityManager.merge(comment);
     }
 

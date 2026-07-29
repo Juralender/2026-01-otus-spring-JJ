@@ -3,7 +3,6 @@ package ru.otus.hw.repositories;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
@@ -43,9 +42,6 @@ public class JpaBookRepository implements BookRepository {
             return book;
         }
 
-        if (entityManager.find(Book.class, book.getId()) == null) {
-            throw new EntityNotFoundException("Book with id %d not found".formatted(book.getId()));
-        }
         return entityManager.merge(book);
     }
 
