@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.JpaAuthorRepository;
@@ -17,6 +18,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Интеграционные тесты сервиса книг")
 @DataJpaTest
@@ -81,6 +83,13 @@ class BookServiceIntegrationTest {
         } finally {
             bookService.deleteById(savedBook.getId());
         }
+    }
+
+    @DisplayName("должен выбрасывать исключение при обновлении несуществующей книги")
+    @Test
+    void shouldThrowExceptionWhenUpdatingNonExistentBook() {
+        assertThatThrownBy(() -> bookService.update(10_000L, "Title", 1L, Set.of(1L)))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @DisplayName("должен удалять книгу")

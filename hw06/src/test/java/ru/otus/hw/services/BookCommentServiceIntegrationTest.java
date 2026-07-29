@@ -7,12 +7,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.BookComment;
 import ru.otus.hw.repositories.JpaBookCommentRepository;
 import ru.otus.hw.repositories.JpaBookRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Интеграционные тесты сервиса комментариев к книгам")
 @DataJpaTest
@@ -78,6 +80,13 @@ class BookCommentServiceIntegrationTest {
         } finally {
             bookCommentService.deleteById(inserted.getId());
         }
+    }
+
+    @DisplayName("должен выбрасывать исключение при обновлении несуществующего комментария")
+    @Test
+    void shouldThrowExceptionWhenUpdatingNonExistentComment() {
+        assertThatThrownBy(() -> bookCommentService.update(10_000L, "New text"))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @DisplayName("должен удалять комментарий")

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Репозиторий на основе Jpa для работы с книгами")
 @DataJpaTest
@@ -90,16 +88,6 @@ class BookRepositoryTest {
         assertThat(bookFromDb.getAuthor().getId()).isEqualTo(3L);
         assertThat(bookFromDb.getGenres()).extracting(Genre::getId)
                 .containsExactlyInAnyOrder(5L, 6L);
-    }
-
-    @DisplayName("должен выбрасывать исключение при обновлении несуществующей книги")
-    @Test
-    void shouldThrowExceptionWhenUpdatingNonExistentBook() {
-        var author = testEntityManager.find(Author.class, 1L);
-        var missingBook = new Book(10_000L, "BookTitle_10500", author, List.of());
-
-        assertThatThrownBy(() -> repository.save(missingBook))
-                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @DisplayName("должен удалять книгу по id")

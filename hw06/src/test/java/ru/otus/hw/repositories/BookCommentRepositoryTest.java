@@ -6,12 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.BookComment;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Репозиторий на основе Jpa для работы с комментариями к книгам")
 @DataJpaTest
@@ -89,16 +87,6 @@ class BookCommentRepositoryTest {
 
         var commentFromDb = testEntityManager.find(BookComment.class, comment.getId());
         assertThat(commentFromDb.getText()).isEqualTo("New text");
-    }
-
-    @DisplayName("должен выбрасывать исключение при обновлении несуществующего комментария")
-    @Test
-    void shouldThrowExceptionWhenUpdatingNonExistentComment() {
-        var book = testEntityManager.find(Book.class, 1L);
-        var missingComment = new BookComment(10_000L, "text", book);
-
-        assertThatThrownBy(() -> repository.save(missingComment))
-                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @DisplayName("должен удалять комментарий по id")
