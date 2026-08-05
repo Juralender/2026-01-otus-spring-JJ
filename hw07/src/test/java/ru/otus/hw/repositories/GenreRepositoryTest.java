@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import ru.otus.hw.models.Genre;
 
 import java.util.List;
@@ -17,11 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Репозиторий на основе Jpa для работы с жанрами")
 @DataJpaTest
-@Import(JpaGenreRepository.class)
 class GenreRepositoryTest {
 
     @Autowired
-    private JpaGenreRepository repository;
+    private GenreRepository repository;
 
     @Autowired
     private TestEntityManager testEntityManager;
@@ -42,7 +40,7 @@ class GenreRepositoryTest {
                 testEntityManager.find(Genre.class, 5L));
         var ids = expectedGenres.stream().map(Genre::getId).collect(Collectors.toSet());
 
-        var actualGenres = repository.findAllByIds(ids);
+        var actualGenres = repository.findAllByIdIn(ids);
 
         assertThat(actualGenres).containsExactlyInAnyOrderElementsOf(expectedGenres);
     }
@@ -50,7 +48,7 @@ class GenreRepositoryTest {
     @DisplayName("должен возвращать пустой список, если жанры с переданными id не найдены")
     @Test
     void shouldReturnEmptyListForUnknownIds() {
-        var actualGenres = repository.findAllByIds(Set.of(10_000L));
+        var actualGenres = repository.findAllByIdIn(Set.of(10_000L));
         assertThat(actualGenres).isEmpty();
     }
 

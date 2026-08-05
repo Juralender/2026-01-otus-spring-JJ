@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.BookComment;
 
@@ -13,11 +12,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Репозиторий на основе Jpa для работы с комментариями к книгам")
 @DataJpaTest
-@Import(JpaBookCommentRepository.class)
 class BookCommentRepositoryTest {
 
     @Autowired
-    private JpaBookCommentRepository repository;
+    private BookCommentRepository repository;
 
     @Autowired
     private TestEntityManager testEntityManager;
@@ -50,7 +48,7 @@ class BookCommentRepositoryTest {
         testEntityManager.persistAndFlush(new BookComment("Comment_1_2", book1));
         testEntityManager.persistAndFlush(new BookComment("Comment_2_1", book2));
 
-        var actualComments = repository.findAllByBookId(book1.getId());
+        var actualComments = repository.findAllByBookIdOrderByIdAsc(book1.getId());
 
         assertThat(actualComments).extracting(BookComment::getText)
                 .containsExactly("Comment_1_1", "Comment_1_2");

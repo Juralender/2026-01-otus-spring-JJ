@@ -9,8 +9,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.BookComment;
-import ru.otus.hw.repositories.JpaBookCommentRepository;
-import ru.otus.hw.repositories.JpaBookRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -18,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Интеграционные тесты сервиса комментариев к книгам")
 @DataJpaTest
-@Import({BookCommentServiceImpl.class, JpaBookCommentRepository.class, JpaBookRepository.class})
+@Import(BookCommentServiceImpl.class)
 @Transactional(propagation = Propagation.NEVER)
 class BookCommentServiceIntegrationTest {
 
