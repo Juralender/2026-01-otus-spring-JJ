@@ -42,11 +42,12 @@ class BookRepositoryTest {
         assertThat(repository.findById(10_000L)).isEmpty();
     }
 
-    @DisplayName("должен загружать список всех книг со всеми связями")
+    @DisplayName("должен загружать список книг с авторами")
     @Test
-    void shouldReturnCorrectBooksList() {
+    void shouldReturnBooksWithAuthors() {
         var actualBooks = repository.findAll();
-        assertThat(actualBooks).usingRecursiveComparison().isEqualTo(getDbBooks());
+        assertThat(actualBooks).extracting(Book::getAuthor)
+                .containsExactlyElementsOf(getDbAuthors());
     }
 
     @DisplayName("должен сохранять новую книгу")

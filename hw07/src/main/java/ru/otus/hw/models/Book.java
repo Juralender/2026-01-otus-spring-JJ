@@ -9,6 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -17,11 +19,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.List;
 
 @Entity
 @Table(name = "books")
+@NamedEntityGraph(name = "Book.withAuthor", attributeNodes = @NamedAttributeNode("author"))
+@NamedEntityGraph(name = "Book.withAuthorAndGenres", attributeNodes = {
+        @NamedAttributeNode("author"),
+        @NamedAttributeNode("genres")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -50,5 +58,6 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
     @OrderBy("id")
+    @BatchSize(size = 20)
     private List<Genre> genres;
 }
