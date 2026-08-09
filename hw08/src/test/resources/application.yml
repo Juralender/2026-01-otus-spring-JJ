@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      database: testdb
+  shell:
+    interactive:
+      enabled: false
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 5.0.5
