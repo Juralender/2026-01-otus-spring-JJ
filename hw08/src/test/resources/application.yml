@@ -10,4 +10,4 @@ de:
   flapdoodle:
     mongodb:
       embedded:
-        version: 5.0.5
+        version: 7.0.5
