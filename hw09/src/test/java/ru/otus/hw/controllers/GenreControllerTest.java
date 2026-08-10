@@ -95,11 +95,11 @@ class GenreControllerTest {
     @Test
     void shouldUpdateGenreAndRedirect() throws Exception {
         mockMvc.perform(post("/genres/1")
-                        .param("name", "Updated Genre"))
+                        .param("name", "Updated"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/genres"));
 
-        verify(genreService).update(1L, "Updated Genre");
+        verify(genreService).update(1L, "Updated");
     }
 
     @DisplayName("не должен предоставлять способ удаления жанра методом GET")
