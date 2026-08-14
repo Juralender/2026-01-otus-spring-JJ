@@ -7,7 +7,6 @@ import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
-import ru.otus.hw.repositories.BookCommentRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
 
@@ -25,8 +24,6 @@ public class BookServiceImpl implements BookService {
     private final GenreRepository genreRepository;
 
     private final BookRepository bookRepository;
-
-    private final BookCommentRepository bookCommentRepository;
 
     @Override
     public Optional<Book> findById(String id) {
@@ -64,7 +61,6 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void deleteById(String id) {
-        bookCommentRepository.deleteAllByBookId(id);
         bookRepository.deleteById(id);
     }
 

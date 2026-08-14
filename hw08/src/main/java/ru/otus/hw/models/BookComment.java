@@ -27,7 +27,7 @@ public class BookComment {
     @ToString.Include
     private String text;
 
-    @DBRef
+    @DBRef(lazy = true)
     private Book book;
 
     public BookComment(String text, Book book) {

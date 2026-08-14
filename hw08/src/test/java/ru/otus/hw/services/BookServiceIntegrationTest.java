@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.context.annotation.Import;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.listeners.BookCommentCascadeDeleteListener;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.BookComment;
@@ -25,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Интеграционные тесты сервиса книг")
 @DataMongoTest
-@Import(BookServiceImpl.class)
+@Import({BookServiceImpl.class, BookCommentCascadeDeleteListener.class})
 class BookServiceIntegrationTest {
 
     @Autowired
