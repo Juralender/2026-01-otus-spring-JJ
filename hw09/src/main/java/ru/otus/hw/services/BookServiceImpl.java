@@ -10,9 +10,13 @@ import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
+import ru.otus.hw.services.dto.AuthorDto;
+import ru.otus.hw.services.dto.BookCreateDto;
+import ru.otus.hw.services.dto.BookDto;
+import ru.otus.hw.services.dto.BookUpdateDto;
+import ru.otus.hw.services.dto.GenreDto;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -28,42 +32,43 @@ public class BookServiceImpl implements BookService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<Book> findById(long id) {
-        return bookRepository.findById(id);
+    public BookDto findById(long id) {
+        return bookRepository.findById(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Book> findAll() {
-        var books = bookRepository.findAll();
-        books.forEach(book -> book.getGenres().size());
-        return books;
+    public List<BookDto> findAll() {
+        return bookRepository.findAll().stream().map(this::toDto).toList();
     }
 
     @Transactional
     @Override
-    public Book insert(String title, long authorId, Set<Long> genresIds) {
-        var author = getAuthor(authorId);
-        var genres = getGenres(genresIds);
+    public BookDto insert(BookCreateDto bookCreateDto) {
+        var author = getAuthor(bookCreateDto.getAuthorId());
+        var genres = getGenres(bookCreateDto.getGenreIds());
 
-        var book = new Book(0, title, author, genres);
-        return bookRepository.save(book);
+        var book = new Book(0, bookCreateDto.getTitle(), author, genres);
+        return toDto(bookRepository.save(book));
     }
 
     @Transactional
     @Override
-    public Book update(long id, String title, long authorId, Set<Long> genresIds) {
-        var book = bookRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
+    public BookDto update(BookUpdateDto bookUpdateDto) {
+        var book = bookRepository.findById(bookUpdateDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Book with id %d not found".formatted(bookUpdateDto.getId())));
 
-        var author = getAuthor(authorId);
-        var genres = getGenres(genresIds);
+        var author = getAuthor(bookUpdateDto.getAuthorId());
+        var genres = getGenres(bookUpdateDto.getGenreIds());
 
-        book.setTitle(title);
+        book.setTitle(bookUpdateDto.getTitle());
         book.setAuthor(author);
         book.setGenres(genres);
 
-        return bookRepository.save(book);
+        return toDto(bookRepository.save(book));
     }
 
     @Transactional
@@ -87,5 +92,13 @@ public class BookServiceImpl implements BookService {
             throw new EntityNotFoundException("One or all genres with ids %s not found".formatted(genresIds));
         }
         return genres;
+    }
+
+    private BookDto toDto(Book book) {
+        var authorDto = new AuthorDto(book.getAuthor().getId(), book.getAuthor().getFullName());
+        var genreDtos = book.getGenres().stream()
+                .map(genre -> new GenreDto(genre.getId(), genre.getName()))
+                .toList();
+        return new BookDto(book.getId(), book.getTitle(), authorDto, genreDtos);
     }
 }

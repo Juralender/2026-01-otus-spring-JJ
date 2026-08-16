@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 import ru.otus.hw.controllers.dto.BookCommentFormDto;
 import ru.otus.hw.services.BookCommentService;
+import ru.otus.hw.services.dto.BookCommentCreateDto;
 
 @Controller
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public class BookCommentController {
 
     @PostMapping("/books/{bookId}/comments")
     public ModelAndView create(@PathVariable long bookId, @ModelAttribute("newComment") BookCommentFormDto form) {
-        bookCommentService.insert(form.getText(), bookId);
+        bookCommentService.insert(new BookCommentCreateDto(form.getText(), bookId));
         return new ModelAndView("redirect:/books/%d".formatted(bookId));
     }
 

@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 import ru.otus.hw.controllers.dto.AuthorFormDto;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.AuthorService;
 
 @Controller
@@ -33,10 +32,8 @@ public class AuthorController {
 
     @GetMapping("/authors/{id}/edit")
     public ModelAndView editAuthorForm(@PathVariable long id) {
-        var author = authorService.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(id)));
         return new ModelAndView("authors/form")
-                .addObject("authorForm", AuthorFormDto.fromAuthor(author));
+                .addObject("authorForm", AuthorFormDto.fromDto(authorService.findById(id)));
     }
 
     @PostMapping("/authors")
@@ -44,7 +41,7 @@ public class AuthorController {
         if (bindingResult.hasErrors()) {
             return new ModelAndView("authors/form");
         }
-        authorService.insert(form.getFullName());
+        authorService.insert(form.toCreateDto());
         return new ModelAndView("redirect:/authors");
     }
 
@@ -54,7 +51,7 @@ public class AuthorController {
         if (bindingResult.hasErrors()) {
             return new ModelAndView("authors/form");
         }
-        authorService.update(id, form.getFullName());
+        authorService.update(form.toUpdateDto(id));
         return new ModelAndView("redirect:/authors");
     }
 }

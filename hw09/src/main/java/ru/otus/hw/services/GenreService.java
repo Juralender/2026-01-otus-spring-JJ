@@ -1,16 +1,17 @@
 package ru.otus.hw.services;
 
-import ru.otus.hw.models.Genre;
+import ru.otus.hw.services.dto.GenreCreateDto;
+import ru.otus.hw.services.dto.GenreDto;
+import ru.otus.hw.services.dto.GenreUpdateDto;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface GenreService {
-    List<Genre> findAll();
+    List<GenreDto> findAll();
 
-    Optional<Genre> findById(long id);
+    GenreDto findById(long id);
 
-    Genre insert(String name);
+    GenreDto insert(GenreCreateDto genreCreateDto);
 
-    Genre update(long id, String name);
+    GenreDto update(GenreUpdateDto genreUpdateDto);
 }

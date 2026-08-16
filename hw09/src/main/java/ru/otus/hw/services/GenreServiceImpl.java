@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Genre;
 import ru.otus.hw.repositories.GenreRepository;
+import ru.otus.hw.services.dto.GenreCreateDto;
+import ru.otus.hw.services.dto.GenreDto;
+import ru.otus.hw.services.dto.GenreUpdateDto;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -17,28 +19,36 @@ public class GenreServiceImpl implements GenreService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Genre> findAll() {
-        return genreRepository.findAll();
+    public List<GenreDto> findAll() {
+        return genreRepository.findAll().stream().map(this::toDto).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<Genre> findById(long id) {
-        return genreRepository.findById(id);
-    }
-
-    @Transactional
-    @Override
-    public Genre insert(String name) {
-        return genreRepository.save(new Genre(0, name));
-    }
-
-    @Transactional
-    @Override
-    public Genre update(long id, String name) {
-        var genre = genreRepository.findById(id)
+    public GenreDto findById(long id) {
+        return genreRepository.findById(id)
+                .map(this::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Genre with id %d not found".formatted(id)));
-        genre.setName(name);
-        return genreRepository.save(genre);
+    }
+
+    @Transactional
+    @Override
+    public GenreDto insert(GenreCreateDto genreCreateDto) {
+        var genre = genreRepository.save(new Genre(0, genreCreateDto.getName()));
+        return toDto(genre);
+    }
+
+    @Transactional
+    @Override
+    public GenreDto update(GenreUpdateDto genreUpdateDto) {
+        var genre = genreRepository.findById(genreUpdateDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Genre with id %d not found".formatted(genreUpdateDto.getId())));
+        genre.setName(genreUpdateDto.getName());
+        return toDto(genreRepository.save(genre));
+    }
+
+    private GenreDto toDto(Genre genre) {
+        return new GenreDto(genre.getId(), genre.getName());
     }
 }

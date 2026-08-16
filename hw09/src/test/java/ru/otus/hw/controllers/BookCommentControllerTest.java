@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.services.BookCommentService;
+import ru.otus.hw.services.dto.BookCommentCreateDto;
 
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,7 +32,7 @@ class BookCommentControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books/1"));
 
-        verify(bookCommentService).insert("New comment", 1L);
+        verify(bookCommentService).insert(new BookCommentCreateDto("New comment", 1L));
     }
 
     @DisplayName("должен удалять комментарий и делать редирект на страницу книги")

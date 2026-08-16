@@ -8,17 +8,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.controllers.dto.BookFormDto;
-import ru.otus.hw.models.Author;
-import ru.otus.hw.models.Book;
-import ru.otus.hw.models.BookComment;
-import ru.otus.hw.models.Genre;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookCommentService;
 import ru.otus.hw.services.BookService;
 import ru.otus.hw.services.GenreService;
+import ru.otus.hw.services.dto.AuthorDto;
+import ru.otus.hw.services.dto.BookCommentDto;
+import ru.otus.hw.services.dto.BookCreateDto;
+import ru.otus.hw.services.dto.BookDto;
+import ru.otus.hw.services.dto.BookUpdateDto;
+import ru.otus.hw.services.dto.GenreDto;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.BDDMockito.given;
@@ -48,47 +50,47 @@ class BookControllerTest {
     @MockitoBean
     private GenreService genreService;
 
-    private Author author;
+    private AuthorDto authorDto;
 
-    private Genre genre;
+    private GenreDto genreDto;
 
-    private Book book;
+    private BookDto bookDto;
 
     @BeforeEach
     void setUp() {
-        author = new Author(1, "Author_1");
-        genre = new Genre(1, "Genre_1");
-        book = new Book(1, "BookTitle_1", author, List.of(genre));
+        authorDto = new AuthorDto(1, "Author_1");
+        genreDto = new GenreDto(1, "Genre_1");
+        bookDto = new BookDto(1, "BookTitle_1", authorDto, List.of(genreDto));
     }
 
     @DisplayName("должен отображать список книг")
     @Test
     void shouldReturnBooksList() throws Exception {
-        given(bookService.findAll()).willReturn(List.of(book));
+        given(bookService.findAll()).willReturn(List.of(bookDto));
 
         mockMvc.perform(get("/books"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("books/list"))
-                .andExpect(model().attribute("books", List.of(book)));
+                .andExpect(model().attribute("books", List.of(bookDto)));
     }
 
     @DisplayName("должен отображать книгу по id вместе с комментариями")
     @Test
     void shouldReturnBookById() throws Exception {
-        given(bookService.findById(1L)).willReturn(Optional.of(book));
-        given(bookCommentService.findAllByBookId(1L)).willReturn(List.of(new BookComment(1, "Comment", book)));
+        given(bookService.findById(1L)).willReturn(bookDto);
+        given(bookCommentService.findAllByBookId(1L)).willReturn(List.of(new BookCommentDto(1, "Comment", 1L)));
 
         mockMvc.perform(get("/books/1"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("books/view"))
-                .andExpect(model().attribute("book", book))
+                .andExpect(model().attribute("book", bookDto))
                 .andExpect(model().attributeExists("comments", "newComment"));
     }
 
     @DisplayName("должен возвращать 404 при отсутствии книги")
     @Test
     void shouldReturn404WhenBookNotFound() throws Exception {
-        given(bookService.findById(100L)).willReturn(Optional.empty());
+        given(bookService.findById(100L)).willThrow(new EntityNotFoundException("Book with id 100 not found"));
 
         mockMvc.perform(get("/books/100"))
                 .andExpect(status().isNotFound())
@@ -98,34 +100,34 @@ class BookControllerTest {
     @DisplayName("должен отображать форму создания книги со списками авторов и жанров")
     @Test
     void shouldReturnNewBookForm() throws Exception {
-        given(authorService.findAll()).willReturn(List.of(author));
-        given(genreService.findAll()).willReturn(List.of(genre));
+        given(authorService.findAll()).willReturn(List.of(authorDto));
+        given(genreService.findAll()).willReturn(List.of(genreDto));
 
         mockMvc.perform(get("/books/new"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("books/form"))
                 .andExpect(model().attribute("bookForm", new BookFormDto()))
-                .andExpect(model().attribute("authors", List.of(author)))
-                .andExpect(model().attribute("genres", List.of(genre)));
+                .andExpect(model().attribute("authors", List.of(authorDto)))
+                .andExpect(model().attribute("genres", List.of(genreDto)));
     }
 
     @DisplayName("должен отображать форму редактирования, заполненную данными книги")
     @Test
     void shouldReturnEditBookForm() throws Exception {
-        given(bookService.findById(1L)).willReturn(Optional.of(book));
-        given(authorService.findAll()).willReturn(List.of(author));
-        given(genreService.findAll()).willReturn(List.of(genre));
+        given(bookService.findById(1L)).willReturn(bookDto);
+        given(authorService.findAll()).willReturn(List.of(authorDto));
+        given(genreService.findAll()).willReturn(List.of(genreDto));
 
         mockMvc.perform(get("/books/1/edit"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("books/form"))
-                .andExpect(model().attribute("bookForm", BookFormDto.fromBook(book)));
+                .andExpect(model().attribute("bookForm", BookFormDto.fromDto(bookDto)));
     }
 
     @DisplayName("должен возвращать 404 при редактировании несуществующей книги")
     @Test
     void shouldReturn404WhenEditingNonExistentBook() throws Exception {
-        given(bookService.findById(100L)).willReturn(Optional.empty());
+        given(bookService.findById(100L)).willThrow(new EntityNotFoundException("Book with id 100 not found"));
 
         mockMvc.perform(get("/books/100/edit"))
                 .andExpect(status().isNotFound())
@@ -142,7 +144,7 @@ class BookControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books"));
 
-        verify(bookService).insert("New Book", 1L, Set.of(1L, 2L));
+        verify(bookService).insert(new BookCreateDto("New Book", 1L, Set.of(1L, 2L)));
     }
 
     @DisplayName("должен обновлять книгу и делать редирект на список книг")
@@ -155,7 +157,7 @@ class BookControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/books"));
 
-        verify(bookService).update(1L, "Updated Book", 2L, Set.of(3L));
+        verify(bookService).update(new BookUpdateDto(1L, "Updated Book", 2L, Set.of(3L)));
     }
 
     @DisplayName("должен удалять книгу и делать редирект на список книг")
@@ -178,8 +180,8 @@ class BookControllerTest {
     @DisplayName("не должен создавать книгу с пустым названием")
     @Test
     void shouldNotCreateBookWithBlankTitle() throws Exception {
-        given(authorService.findAll()).willReturn(List.of(author));
-        given(genreService.findAll()).willReturn(List.of(genre));
+        given(authorService.findAll()).willReturn(List.of(authorDto));
+        given(genreService.findAll()).willReturn(List.of(genreDto));
 
         mockMvc.perform(post("/books")
                         .param("title", "")
@@ -194,8 +196,8 @@ class BookControllerTest {
     @DisplayName("не должен создавать книгу с названием длиннее 30 символов")
     @Test
     void shouldNotCreateBookWithTooLongTitle() throws Exception {
-        given(authorService.findAll()).willReturn(List.of(author));
-        given(genreService.findAll()).willReturn(List.of(genre));
+        given(authorService.findAll()).willReturn(List.of(authorDto));
+        given(genreService.findAll()).willReturn(List.of(genreDto));
 
         mockMvc.perform(post("/books")
                         .param("title", "a".repeat(31))

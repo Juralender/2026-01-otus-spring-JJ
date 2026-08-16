@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.repositories.AuthorRepository;
+import ru.otus.hw.services.dto.AuthorCreateDto;
+import ru.otus.hw.services.dto.AuthorDto;
+import ru.otus.hw.services.dto.AuthorUpdateDto;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -17,28 +19,36 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Author> findAll() {
-        return authorRepository.findAll();
+    public List<AuthorDto> findAll() {
+        return authorRepository.findAll().stream().map(this::toDto).toList();
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<Author> findById(long id) {
-        return authorRepository.findById(id);
-    }
-
-    @Transactional
-    @Override
-    public Author insert(String fullName) {
-        return authorRepository.save(new Author(0, fullName));
-    }
-
-    @Transactional
-    @Override
-    public Author update(long id, String fullName) {
-        var author = authorRepository.findById(id)
+    public AuthorDto findById(long id) {
+        return authorRepository.findById(id)
+                .map(this::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(id)));
-        author.setFullName(fullName);
-        return authorRepository.save(author);
+    }
+
+    @Transactional
+    @Override
+    public AuthorDto insert(AuthorCreateDto authorCreateDto) {
+        var author = authorRepository.save(new Author(0, authorCreateDto.getFullName()));
+        return toDto(author);
+    }
+
+    @Transactional
+    @Override
+    public AuthorDto update(AuthorUpdateDto authorUpdateDto) {
+        var author = authorRepository.findById(authorUpdateDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Author with id %d not found".formatted(authorUpdateDto.getId())));
+        author.setFullName(authorUpdateDto.getFullName());
+        return toDto(authorRepository.save(author));
+    }
+
+    private AuthorDto toDto(Author author) {
+        return new AuthorDto(author.getId(), author.getFullName());
     }
 }

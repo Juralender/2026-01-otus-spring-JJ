@@ -8,11 +8,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.controllers.dto.GenreFormDto;
-import ru.otus.hw.models.Genre;
+import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.GenreService;
+import ru.otus.hw.services.dto.GenreCreateDto;
+import ru.otus.hw.services.dto.GenreDto;
+import ru.otus.hw.services.dto.GenreUpdateDto;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -32,11 +34,11 @@ class GenreControllerTest {
     @MockitoBean
     private GenreService genreService;
 
-    private Genre genre;
+    private GenreDto genre;
 
     @BeforeEach
     void setUp() {
-        genre = new Genre(1, "Genre_1");
+        genre = new GenreDto(1, "Genre_1");
     }
 
     @DisplayName("должен отображать список жанров")
@@ -62,18 +64,18 @@ class GenreControllerTest {
     @DisplayName("должен отображать форму редактирования, заполненную данными жанра")
     @Test
     void shouldReturnEditGenreForm() throws Exception {
-        given(genreService.findById(1L)).willReturn(Optional.of(genre));
+        given(genreService.findById(1L)).willReturn(genre);
 
         mockMvc.perform(get("/genres/1/edit"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("genres/form"))
-                .andExpect(model().attribute("genreForm", GenreFormDto.fromGenre(genre)));
+                .andExpect(model().attribute("genreForm", GenreFormDto.fromDto(genre)));
     }
 
     @DisplayName("должен возвращать 404 при редактировании несуществующего жанра")
     @Test
     void shouldReturn404WhenEditingNonExistentGenre() throws Exception {
-        given(genreService.findById(100L)).willReturn(Optional.empty());
+        given(genreService.findById(100L)).willThrow(new EntityNotFoundException("Genre with id 100 not found"));
 
         mockMvc.perform(get("/genres/100/edit"))
                 .andExpect(status().isNotFound())
@@ -88,7 +90,7 @@ class GenreControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/genres"));
 
-        verify(genreService).insert("New Genre");
+        verify(genreService).insert(new GenreCreateDto("New Genre"));
     }
 
     @DisplayName("должен обновлять жанр и делать редирект на список жанров")
@@ -99,7 +101,7 @@ class GenreControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/genres"));
 
-        verify(genreService).update(1L, "Updated");
+        verify(genreService).update(new GenreUpdateDto(1L, "Updated"));
     }
 
     @DisplayName("не должен предоставлять способ удаления жанра методом GET")

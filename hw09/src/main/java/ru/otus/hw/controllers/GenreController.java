@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 import ru.otus.hw.controllers.dto.GenreFormDto;
-import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.GenreService;
 
 @Controller
@@ -33,10 +32,8 @@ public class GenreController {
 
     @GetMapping("/genres/{id}/edit")
     public ModelAndView editGenreForm(@PathVariable long id) {
-        var genre = genreService.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Genre with id %d not found".formatted(id)));
         return new ModelAndView("genres/form")
-                .addObject("genreForm", GenreFormDto.fromGenre(genre));
+                .addObject("genreForm", GenreFormDto.fromDto(genreService.findById(id)));
     }
 
     @PostMapping("/genres")
@@ -44,7 +41,7 @@ public class GenreController {
         if (bindingResult.hasErrors()) {
             return new ModelAndView("genres/form");
         }
-        genreService.insert(form.getName());
+        genreService.insert(form.toCreateDto());
         return new ModelAndView("redirect:/genres");
     }
 
@@ -54,7 +51,7 @@ public class GenreController {
         if (bindingResult.hasErrors()) {
             return new ModelAndView("genres/form");
         }
-        genreService.update(id, form.getName());
+        genreService.update(form.toUpdateDto(id));
         return new ModelAndView("redirect:/genres");
     }
 }

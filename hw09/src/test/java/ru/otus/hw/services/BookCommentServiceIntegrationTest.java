@@ -8,10 +8,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.models.BookComment;
+import ru.otus.hw.services.dto.BookCommentCreateDto;
+import ru.otus.hw.services.dto.BookCommentDto;
+import ru.otus.hw.services.dto.BookCommentUpdateDto;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("Интеграционные тесты сервиса комментариев к книгам")
@@ -23,43 +24,40 @@ class BookCommentServiceIntegrationTest {
     @Autowired
     private BookCommentService bookCommentService;
 
-    @DisplayName("должен позволять обращаться к книге комментария вне транзакции сервиса (insert)")
+    @DisplayName("должен возвращать id книги комментария при добавлении")
     @Test
-    void shouldAllowAccessingBookAfterInsertOutsideTransaction() {
-        var comment = bookCommentService.insert("Integration test comment", 1L);
+    void shouldReturnBookIdAfterInsert() {
+        var comment = bookCommentService.insert(new BookCommentCreateDto("Integration test comment", 1L));
         try {
-            assertThatCode(() -> assertThat(comment.getBook().getTitle()).isEqualTo("BookTitle_1"))
-                    .doesNotThrowAnyException();
+            assertThat(comment.getBookId()).isEqualTo(1L);
         } finally {
             bookCommentService.deleteById(comment.getId());
         }
     }
 
-    @DisplayName("должен позволять обращаться к книге комментария вне транзакции сервиса (findById)")
+    @DisplayName("должен возвращать id книги комментария (findById)")
     @Test
-    void shouldAllowAccessingBookAfterFindByIdOutsideTransaction() {
-        var inserted = bookCommentService.insert("Integration test comment 2", 2L);
+    void shouldReturnBookIdOnFindById() {
+        var inserted = bookCommentService.insert(new BookCommentCreateDto("Integration test comment 2", 2L));
         try {
-            var found = bookCommentService.findById(inserted.getId()).orElseThrow();
+            var found = bookCommentService.findById(inserted.getId());
 
-            assertThatCode(() -> assertThat(found.getBook().getTitle()).isEqualTo("BookTitle_2"))
-                    .doesNotThrowAnyException();
+            assertThat(found.getBookId()).isEqualTo(2L);
         } finally {
             bookCommentService.deleteById(inserted.getId());
         }
     }
 
-    @DisplayName("должен позволять обращаться к книге каждого комментария вне транзакции сервиса (findAllByBookId)")
+    @DisplayName("должен возвращать id книги каждого комментария (findAllByBookId)")
     @Test
-    void shouldAllowAccessingBookAfterFindAllByBookIdOutsideTransaction() {
-        var first = bookCommentService.insert("Comment A", 3L);
-        var second = bookCommentService.insert("Comment B", 3L);
+    void shouldReturnBookIdForEachCommentOnFindAllByBookId() {
+        var first = bookCommentService.insert(new BookCommentCreateDto("Comment A", 3L));
+        var second = bookCommentService.insert(new BookCommentCreateDto("Comment B", 3L));
         try {
             var comments = bookCommentService.findAllByBookId(3L);
 
-            assertThat(comments).extracting(BookComment::getText).contains("Comment A", "Comment B");
-            assertThatCode(() -> comments.forEach(c -> c.getBook().getTitle()))
-                    .doesNotThrowAnyException();
+            assertThat(comments).extracting(BookCommentDto::getText).contains("Comment A", "Comment B");
+            assertThat(comments).extracting(BookCommentDto::getBookId).containsOnly(3L);
         } finally {
             bookCommentService.deleteById(first.getId());
             bookCommentService.deleteById(second.getId());
@@ -69,12 +67,12 @@ class BookCommentServiceIntegrationTest {
     @DisplayName("должен обновлять текст комментария")
     @Test
     void shouldUpdateComment() {
-        var inserted = bookCommentService.insert("Old text", 1L);
+        var inserted = bookCommentService.insert(new BookCommentCreateDto("Old text", 1L));
         try {
-            var updated = bookCommentService.update(inserted.getId(), "New text");
+            var updated = bookCommentService.update(new BookCommentUpdateDto(inserted.getId(), "New text"));
 
             assertThat(updated.getText()).isEqualTo("New text");
-            assertThatCode(() -> updated.getBook().getTitle()).doesNotThrowAnyException();
+            assertThat(updated.getBookId()).isEqualTo(1L);
         } finally {
             bookCommentService.deleteById(inserted.getId());
         }
@@ -83,17 +81,18 @@ class BookCommentServiceIntegrationTest {
     @DisplayName("должен выбрасывать исключение при обновлении несуществующего комментария")
     @Test
     void shouldThrowExceptionWhenUpdatingNonExistentComment() {
-        assertThatThrownBy(() -> bookCommentService.update(10_000L, "New text"))
+        assertThatThrownBy(() -> bookCommentService.update(new BookCommentUpdateDto(10_000L, "New text")))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @DisplayName("должен удалять комментарий")
     @Test
     void shouldDeleteComment() {
-        var inserted = bookCommentService.insert("To delete", 1L);
+        var inserted = bookCommentService.insert(new BookCommentCreateDto("To delete", 1L));
 
         bookCommentService.deleteById(inserted.getId());
 
-        assertThat(bookCommentService.findById(inserted.getId())).isEmpty();
+        assertThatThrownBy(() -> bookCommentService.findById(inserted.getId()))
+                .isInstanceOf(EntityNotFoundException.class);
     }
 }

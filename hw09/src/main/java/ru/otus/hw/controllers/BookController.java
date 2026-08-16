@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 import ru.otus.hw.controllers.dto.BookCommentFormDto;
 import ru.otus.hw.controllers.dto.BookFormDto;
-import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.models.Book;
 import ru.otus.hw.services.AuthorService;
 import ru.otus.hw.services.BookCommentService;
 import ru.otus.hw.services.BookService;
@@ -39,7 +37,7 @@ public class BookController {
     @GetMapping("/books/{id}")
     public ModelAndView findById(@PathVariable long id) {
         return new ModelAndView("books/view")
-                .addObject("book", getBook(id))
+                .addObject("book", bookService.findById(id))
                 .addObject("comments", bookCommentService.findAllByBookId(id))
                 .addObject("newComment", new BookCommentFormDto());
     }
@@ -53,7 +51,7 @@ public class BookController {
     @GetMapping("/books/{id}/edit")
     public ModelAndView editBookForm(@PathVariable long id) {
         return addAuthorsAndGenres(new ModelAndView("books/form")
-                .addObject("bookForm", BookFormDto.fromBook(getBook(id))));
+                .addObject("bookForm", BookFormDto.fromDto(bookService.findById(id))));
     }
 
     @PostMapping("/books")
@@ -61,7 +59,7 @@ public class BookController {
         if (bindingResult.hasErrors()) {
             return addAuthorsAndGenres(new ModelAndView("books/form"));
         }
-        bookService.insert(form.getTitle(), form.getAuthorId(), form.getGenreIds());
+        bookService.insert(form.toCreateDto());
         return new ModelAndView("redirect:/books");
     }
 
@@ -71,7 +69,7 @@ public class BookController {
         if (bindingResult.hasErrors()) {
             return addAuthorsAndGenres(new ModelAndView("books/form"));
         }
-        bookService.update(id, form.getTitle(), form.getAuthorId(), form.getGenreIds());
+        bookService.update(form.toUpdateDto(id));
         return new ModelAndView("redirect:/books");
     }
 
@@ -79,11 +77,6 @@ public class BookController {
     public ModelAndView delete(@PathVariable long id) {
         bookService.deleteById(id);
         return new ModelAndView("redirect:/books");
-    }
-
-    private Book getBook(long id) {
-        return bookService.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Book with id %d not found".formatted(id)));
     }
 
     private ModelAndView addAuthorsAndGenres(ModelAndView mv) {
