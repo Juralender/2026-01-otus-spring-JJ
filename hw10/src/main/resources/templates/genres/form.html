@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(title=(${genreForm.id == 0} ? 'New genre' : 'Edit genre'))}"></head>
+<body>
+<nav th:replace="~{fragments/common :: nav}"></nav>
+
+<h1 th:text="${genreForm.id == 0} ? 'New genre' : 'Edit genre'">Genre form</h1>
+
+<form method="post" th:object="${genreForm}"
+      th:action="${genreForm.id == 0} ? @{/genres} : @{/genres/{id}(id=${genreForm.id})}">
+    <label for="name">Name</label>
+    <input id="name" type="text" th:field="*{name}"/>
+    <div class="error-message" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name error</div>
+
+    <div class="buttons">
+        <button type="submit">Save</button>
+        <a th:href="@{/genres}">Cancel</a>
+    </div>
+</form>
+</body>
+</html>
