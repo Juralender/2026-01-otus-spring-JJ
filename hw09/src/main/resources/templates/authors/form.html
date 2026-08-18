@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(title=(${authorForm.id == 0} ? 'New author' : 'Edit author'))}"></head>
+<body>
+<nav th:replace="~{fragments/common :: nav}"></nav>
+
+<h1 th:text="${authorForm.id == 0} ? 'New author' : 'Edit author'">Author form</h1>
+
+<form method="post" th:object="${authorForm}"
+      th:action="${authorForm.id == 0} ? @{/authors} : @{/authors/{id}(id=${authorForm.id})}">
+    <label for="fullName">Full name</label>
+    <input id="fullName" type="text" th:field="*{fullName}"/>
+    <div class="error-message" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}">Full name error</div>
+
+    <div class="buttons">
+        <button type="submit">Save</button>
+        <a th:href="@{/authors}">Cancel</a>
+    </div>
+</form>
+</body>
+</html>
