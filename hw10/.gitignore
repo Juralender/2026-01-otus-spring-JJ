@@ -29,3 +29,6 @@ HELP.md
 .vscode/
 
 spring-shell.log
+
+### Frontend build output ###
+/src/main/resources/static/
