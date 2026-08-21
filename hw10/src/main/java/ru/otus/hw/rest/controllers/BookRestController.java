@@ -43,9 +43,9 @@ public class BookRestController {
     }
 
     @PutMapping("/{id}")
-    public BookDto update(@PathVariable long id, @Valid @RequestBody BookCreateDto bookCreateDto) {
-        return bookService.update(new BookUpdateDto(
-                id, bookCreateDto.getTitle(), bookCreateDto.getAuthorId(), bookCreateDto.getGenreIds()));
+    public BookDto update(@PathVariable long id, @Valid @RequestBody BookUpdateDto bookUpdateDto) {
+        bookUpdateDto.setId(id);
+        return bookService.update(bookUpdateDto);
     }
 
     @DeleteMapping("/{id}")
