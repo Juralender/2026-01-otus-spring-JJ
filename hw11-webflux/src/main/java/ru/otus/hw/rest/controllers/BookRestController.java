@@ -81,10 +81,9 @@ public class BookRestController {
     @Transactional
     @PutMapping("/{id}")
     public Mono<BookDto> update(@PathVariable long id, @Valid @RequestBody BookUpdateDto bookUpdateDto) {
-        bookUpdateDto.setId(id);
-        return bookRepository.findById(bookUpdateDto.getId())
+        return bookRepository.findById(id)
                 .switchIfEmpty(Mono.error(new EntityNotFoundException(
-                        "Book with id %d not found".formatted(bookUpdateDto.getId()))))
+                        "Book with id %d not found".formatted(id))))
                 .flatMap(book -> Mono.zip(getAuthor(bookUpdateDto.getAuthorId()), getGenres(bookUpdateDto.getGenreIds()))
                         .flatMap(tuple -> {
                             book.setTitle(bookUpdateDto.getTitle());
@@ -111,9 +110,6 @@ public class BookRestController {
     }
 
     private Mono<List<Genre>> getGenres(Set<Long> genreIds) {
-        if (isEmpty(genreIds)) {
-            return Mono.error(new IllegalArgumentException("Genres ids must not be null"));
-        }
         return genreRepository.findAllByIdIn(genreIds)
                 .collectList()
                 .flatMap(genres -> isEmpty(genres) || genreIds.size() != genres.size()
