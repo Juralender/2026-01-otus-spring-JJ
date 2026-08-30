@@ -1,0 +1,6 @@
+spring:
+  liquibase:
+    url: jdbc:h2:mem:maindb;DB_CLOSE_DELAY=-1
+    change-log: db/changelog/db.changelog-master.yaml
+  r2dbc:
+    url: r2dbc:h2:mem:///maindb;DB_CLOSE_DELAY=-1
