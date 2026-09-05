@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: userlist-config
+  labels:
+    app: userlist
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://userlist-postgresql:5432/userlist

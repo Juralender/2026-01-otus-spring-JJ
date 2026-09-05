@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: userlist
+  labels:
+    app: userlist
+spec:
+  type: ClusterIP
+  selector:
+    app: userlist
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

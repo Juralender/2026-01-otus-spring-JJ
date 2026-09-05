@@ -1,0 +1,20 @@
+fullnameOverride: userlist-postgresql
+
+image:
+  repository: postgres
+  tag: "18-trixie"
+  pullPolicy: IfNotPresent
+
+auth:
+  database: userlist
+  existingSecret: db-credentials
+  secretKeys:
+    usernameKey: username
+    passwordKey: password
+
+service:
+  port: 5432
+
+persistence:
+  size: 1Gi
+  storageClassName: ""
