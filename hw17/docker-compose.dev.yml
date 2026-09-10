@@ -1,0 +1,7 @@
+services:
+  library:
+    build:
+      target: dev
+    volumes:
+      - ./src:/app/src
+      - ./pom.xml:/app/pom.xml

@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:18-trixie
+    environment:
+      POSTGRES_DB: ${DB_NAME:-library}
+      POSTGRES_USER: ${DB_USER:-library}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-me}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-library} -d ${DB_NAME:-library}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  library:
+    build:
+      context: .
+      target: runtime
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-library}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-library}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-change-me}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
