@@ -1,0 +1,14 @@
+body { font-family: sans-serif; margin: 2rem; color: #222; }
+nav { margin-bottom: 1.5rem; }
+nav a { margin-right: 1rem; }
+table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; }
+th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; vertical-align: top; }
+.actions a, .actions button { margin-right: 0.5rem; }
+.error-message { color: #b00020; }
+label { display: block; margin-top: 1rem; font-weight: bold; }
+input[type=text], select { width: 100%; max-width: 400px; padding: 0.3rem; }
+select[multiple] { height: 8rem; }
+.buttons { margin-top: 1.5rem; }
+.buttons a, .buttons button { margin-right: 0.5rem; }
+.comment { border: 1px solid #ddd; padding: 0.5rem; margin-bottom: 0.5rem; }
+button { cursor: pointer; }
