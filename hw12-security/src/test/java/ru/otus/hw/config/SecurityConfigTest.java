@@ -23,14 +23,14 @@ class SecurityConfigTest {
     @WithMockUser
     @Test
     void shouldAllowAuthenticatedUser() throws Exception {
-        mockMvc.perform(get("/"))
+        mockMvc.perform(get("/api/authors"))
                 .andExpect(status().isOk());
     }
 
     @DisplayName("должен перенаправлять неаутентифицированного пользователя на страницу входа")
     @Test
     void shouldRedirectUnauthenticatedUserToLogin() throws Exception {
-        mockMvc.perform(get("/"))
+        mockMvc.perform(get("/api/authors"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("**/login"));
     }
