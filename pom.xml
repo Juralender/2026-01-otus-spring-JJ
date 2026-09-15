@@ -22,5 +22,6 @@
         <module>hw09</module>
         <module>hw10</module>
         <module>hw11-webflux</module>
+        <module>hw12-security</module>
     </modules>
 </project>
