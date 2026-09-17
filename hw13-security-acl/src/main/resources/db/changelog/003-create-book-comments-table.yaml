@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 5-create-book-comments-table
+      author: otus
+      changes:
+        - createTable:
+            tableName: book_comments
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: text
+                  type: VARCHAR(255)
+              - column:
+                  name: book_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_book_comments_book
+                    references: books(id)
+                    deleteCascade: true

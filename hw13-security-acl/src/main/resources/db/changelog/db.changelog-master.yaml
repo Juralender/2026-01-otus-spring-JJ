@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - include:
+      file: 001-create-schema.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 002-insert-data.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 003-create-book-comments-table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 004-create-users-table.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 005-add-user-role.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 006-add-book-comment-owner.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 007-create-acl-tables.yaml
+      relativeToChangelogFile: true
