@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-add-users-role-column
+      author: otus
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: role
+                  type: VARCHAR(20)
+                  defaultValue: USER
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 2-set-admin-role
+      author: otus
+      changes:
+        - update:
+            tableName: users
+            columns:
+              - column:
+                  name: role
+                  value: ADMIN
+            where: username = 'admin'
