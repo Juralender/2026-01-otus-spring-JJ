@@ -23,5 +23,6 @@
         <module>hw10</module>
         <module>hw11-webflux</module>
         <module>hw12-security</module>
+        <module>hw13-security-acl</module>
     </modules>
 </project>

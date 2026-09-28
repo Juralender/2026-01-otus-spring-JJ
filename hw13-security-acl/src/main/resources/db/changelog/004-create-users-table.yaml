@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-create-users-table
+      author: otus
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: 2-insert-users
+      author: otus
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: username
+                  value: user
+              - column:
+                  name: password
+                  value: $2y$10$eDvd.ptTG7Yw1Hj7N98npOgHf8eLG8KlIbgAoStxw3koGtskQkNDG
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: username
+                  value: admin
+              - column:
+                  name: password
+                  value: $2y$10$3ZZG9Mup8/.o9TFnmE8vHOuM7Bl7/qaDPqhOjNENYPk4Ts0Ef21FK
