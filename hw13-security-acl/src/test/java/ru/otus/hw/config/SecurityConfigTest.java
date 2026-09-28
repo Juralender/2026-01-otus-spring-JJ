@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Map;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -278,5 +280,76 @@ class SecurityConfigTest {
                         .with(user("admin").roles("ADMIN"))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
+    }
+
+    @DisplayName("должен разрешать владельцу удалять свой комментарий")
+    @Test
+    void shouldAllowOwnerToDeleteOwnComment() throws Exception {
+        long commentId = createComment("user", "Owner comment to delete");
+
+        mockMvc.perform(delete("/api/books/1/comments/" + commentId)
+                        .with(user("user").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/books/1/comments").with(user("user").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == " + commentId + ")]").isEmpty());
+    }
+
+    @DisplayName("должен разрешать администратору редактировать чужой комментарий")
+    @Test
+    void shouldAllowAdminToEditForeignComment() throws Exception {
+        long commentId = createComment("user", "User comment");
+
+        mockMvc.perform(put("/api/books/1/comments/" + commentId)
+                        .with(user("admin").roles("ADMIN"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"text\":\"Moderated by admin\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.text").value("Moderated by admin"));
+    }
+
+    @DisplayName("не должен изменять и удалять комментарий при попытке другого пользователя")
+    @Test
+    void shouldKeepCommentUnchangedWhenNonOwnerTriesToEditOrDelete() throws Exception {
+        long commentId = createComment("user", "Protected comment");
+
+        mockMvc.perform(put("/api/books/1/comments/" + commentId)
+                        .with(user("admin").roles("USER"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"text\":\"Hijacked\"}"))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete("/api/books/1/comments/" + commentId)
+                        .with(user("admin").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/books/1/comments").with(user("user").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.id == " + commentId + ")].text").value("Protected comment"));
+    }
+
+    @DisplayName("должен запрещать пользователю удалять несуществующий комментарий")
+    @Test
+    void shouldForbidUserToDeleteNonExistentComment() throws Exception {
+        mockMvc.perform(delete("/api/books/1/comments/100000")
+                        .with(user("user").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    private long createComment(String username, String text) throws Exception {
+        var createResult = mockMvc.perform(post("/api/books/1/comments")
+                        .with(user(username).roles("USER"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("text", text))))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asLong();
     }
 }
