@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:maindb
+  liquibase:
+    change-log: db/changelog/db.changelog-master.yaml
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+  data:
+    rest:
+      base-path: /datarest
+
+logging:
+  file:
+    name: logs/hw16-actuator.log
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,logfile
+  endpoint:
+    health:
+      show-details: always

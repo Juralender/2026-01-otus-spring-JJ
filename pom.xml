@@ -26,5 +26,6 @@
         <module>hw13-security-acl</module>
         <module>hw14-batch</module>
         <module>hw15</module>
+        <module>hw16</module>
     </modules>
 </project>
