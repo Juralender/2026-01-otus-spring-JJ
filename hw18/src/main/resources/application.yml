@@ -1,0 +1,10 @@
+spring:
+  http:
+    client:
+      connect-timeout: 5s
+      read-timeout: 10s
+
+open-library:
+  base-url: https://openlibrary.org
+  covers-url: https://covers.openlibrary.org
+  user-agent: otus-spring-hw18
