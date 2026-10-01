@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: 001-create-schema.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 003-create-batch-metadata.yaml
+      relativeToChangelogFile: true

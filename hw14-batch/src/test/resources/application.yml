@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+  liquibase:
+    change-log: db/changelog/db.changelog-master.yaml
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: never
+  data:
+    mongodb:
+      database: testdb
+  shell:
+    interactive:
+      enabled: false
+    command:
+      version:
+        enabled: false
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.5
+
+migration:
+  chunk-size: 10
+  threads: 4

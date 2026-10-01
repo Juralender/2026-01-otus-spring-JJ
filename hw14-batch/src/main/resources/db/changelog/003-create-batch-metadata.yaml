@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-create-spring-batch-metadata
+      author: otus
+      changes:
+        - sqlFile:
+            path: org/springframework/batch/core/schema-h2.sql
+            relativeToChangelogFile: false
