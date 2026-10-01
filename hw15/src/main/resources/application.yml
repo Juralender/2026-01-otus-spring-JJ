@@ -1,0 +1,20 @@
+spring:
+  main:
+    banner-mode: off
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+life:
+  simulation:
+    enabled: true
+  people: 3
+  max-generations: 3
+  locale: ru-RU
+  seed:
+
+logging:
+  level:
+    root: warn
+    ru.otus.hw: info
