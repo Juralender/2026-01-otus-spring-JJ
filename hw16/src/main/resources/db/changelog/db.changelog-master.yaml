@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - include:
+      file: 001-create-schema.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 002-insert-data.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 003-create-book-comments-table.yaml
+      relativeToChangelogFile: true
