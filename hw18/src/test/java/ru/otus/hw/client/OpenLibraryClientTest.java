@@ -7,10 +7,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.HttpServerErrorException;
 import ru.otus.hw.client.dto.OpenLibraryDoc;
 import ru.otus.hw.config.OpenLibraryProperties;
-import ru.otus.hw.exceptions.ExternalServiceException;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ import static org.springframework.http.HttpMethod.GET;
 @DisplayName("Клиент Open Library")
 @RestClientTest(OpenLibraryClient.class)
 @EnableConfigurationProperties(OpenLibraryProperties.class)
+@ActiveProfiles("test")
 class OpenLibraryClientTest {
 
     private static final String SEARCH_URL = "https://openlibrary.test/search.json?q=dune&limit=2"
@@ -60,13 +62,12 @@ class OpenLibraryClientTest {
                 new OpenLibraryDoc("/works/OL2W", "No authors", null, null, null));
     }
 
-    @DisplayName("должен бросать ExternalServiceException при ошибке сервиса")
+    @DisplayName("должен пробрасывать ошибку HTTP-клиента при ошибке сервиса")
     @Test
-    void shouldThrowWhenServiceFails() {
+    void shouldPropagateErrorWhenServiceFails() {
         server.expect(requestTo(SEARCH_URL)).andRespond(withServerError());
 
         assertThatThrownBy(() -> client.search("dune", 2))
-                .isInstanceOf(ExternalServiceException.class)
-                .hasMessage("Open Library is unavailable");
+                .isInstanceOf(HttpServerErrorException.class);
     }
 }
