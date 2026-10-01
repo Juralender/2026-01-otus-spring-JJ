@@ -1,0 +1,19 @@
+spring:
+  main:
+    banner-mode: off
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+life:
+  simulation:
+    enabled: false
+  people: 1
+  max-generations: 3
+  locale: en-US
+  seed: 42
+
+logging:
+  level:
+    root: warn
