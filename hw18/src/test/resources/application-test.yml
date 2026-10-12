@@ -1,0 +1,4 @@
+open-library:
+  base-url: https://openlibrary.test
+  covers-url: https://covers.openlibrary.test
+  user-agent: otus-spring-hw18-test
