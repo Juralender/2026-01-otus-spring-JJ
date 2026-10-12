@@ -27,5 +27,6 @@
         <module>hw14-batch</module>
         <module>hw15</module>
         <module>hw16</module>
+        <module>hw18</module>
     </modules>
 </project>
